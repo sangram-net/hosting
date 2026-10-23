@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SentinelX | Identity Registration</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080808;color:#f5f5f5;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:24px}
+main{width:100%;max-width:440px}
+.brand{font-size:25px;font-weight:800;letter-spacing:2px}
+.brand span{color:#e87838}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:70px}
+.status{font-size:10px;color:#aaa;letter-spacing:1px}
+.dot{display:inline-block;width:7px;height:7px;background:#e87838;border-radius:50%;margin-right:7px}
+.eyebrow{font-size:10px;letter-spacing:3px;color:#e87838}
+h1{font-size:44px;line-height:1.08;letter-spacing:-2px;margin:18px 0}
+p{color:#929292;font-size:14px;line-height:1.7}
+form{margin-top:35px}
+label{display:block;font-size:11px;color:#aaa;margin:22px 0 10px}
+input{width:100%;padding:16px;background:#101010;border:1px solid #303030;color:white;outline:none;font-size:14px;border-radius:3px}
+input:focus{border-color:#e87838}
+button{width:100%;padding:17px;margin-top:24px;border:0;background:#e87838;color:#100b08;font-weight:bold;letter-spacing:1px;cursor:pointer;border-radius:3px}
+button:hover{background:#ff9659}
+#result{display:none;margin-top:25px;padding:22px;border:1px solid #39302a;background:#100e0c}
+.small{font-size:10px;letter-spacing:2px;color:#999}
+#code{font-family:monospace;font-size:20px;overflow-wrap:anywhere;margin:18px 0;color:#ff9659}
+.copy{margin-top:0;background:transparent;border:1px solid #45403b;color:white}
+#message{font-size:12px;color:#ff9659}
+footer{margin-top:65px;padding-top:20px;border-top:1px solid #242424;color:#666;font-size:10px;letter-spacing:1px;display:flex;justify-content:space-between}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div class="brand">SENTINEL<span>X</span></div>
+    <div class="status"><span class="dot"></span>REGISTRATION PORTAL</div>
+  </div>
+
+  <div class="eyebrow">IDENTITY SYSTEM / 001</div>
+  <h1>Your identity.<br>Your access code.</h1>
+  <p>Enter your contact details to generate a unique SentinelX registration code.</p>
+
+  <form id="form">
+    <label for="email">EMAIL ADDRESS</label>
+    <input id="email" type="email" placeholder="you@example.com" required autocomplete="email">
+
+    <label for="phone">PHONE NUMBER</label>
+    <input id="phone" type="tel" placeholder="+91 98765 43210" required autocomplete="tel">
+
+    <button type="submit">GENERATE CODE ↗</button>
+    <p id="message" role="status"></p>
+  </form>
+
+  <section id="result" aria-live="polite">
+    <div class="small">YOUR SENTINELX CODE</div>
+    <div id="code"></div>
+    <p>Keep this code for your records.</p>
+    <button class="copy" id="copy" type="button">COPY CODE</button>
+  </section>
+
+  <footer><span>SENTINELX SYSTEMS</span><span>IDENTITY / ACCESS</span></footer>
+</main>
+
+<script>
+const form = document.getElementById('form');
+const result = document.getElementById('result');
+const codeDisplay = document.getElementById('code');
+const message = document.getElementById('message');
+
+form.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+
+  if (!email || !phone || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    message.textContent = 'Please enter a valid email and phone number.';
+    return;
+  }
+
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(12);
+  crypto.getRandomValues(bytes);
+
+  let parts = [];
+  for (let i = 0; i < 12; i += 4) {
+    parts.push(Array.from(bytes.slice(i, i + 4),
+      b => chars[b % chars.length]).join(''));
+  }
+
+  codeDisplay.textContent = 'SX-' + parts.join('-');
+  result.style.display = 'block';
+  message.textContent = 'Code generated for this session.';
+  result.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+
+document.getElementById('copy').addEventListener('click', async function() {
+  try {
+    await navigator.clipboard.writeText(codeDisplay.textContent);
+    this.textContent = 'COPIED ✓';
+  } catch {
+    message.textContent = 'Please select and copy your code manually.';
+  }
+});
+</script>
+</body>
+</html>
